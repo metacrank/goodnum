@@ -1,0 +1,26 @@
+#ifndef STRNUM_H_
+#define STRNUM_H_
+#include <better_string.h>
+#include <stdbool.h>
+
+bool isfloat(string_t *s);
+
+bool isint(string_t *s);
+
+long order(string_t *s);
+
+string_t *neg(string_t *s);
+
+string_t *ip(string_t *s);
+
+string_t *fp(string_t *s);
+
+string_t *sum(string_t *m, string_t *n);
+
+string_t *diff(string_t *m, string_t *n);
+
+string_t *product(string_t *m, string_t *n);
+
+string_t *quotient(string_t *m, string_t *n);
+
+#endif // STRNUM_H_
