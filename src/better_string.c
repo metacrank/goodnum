@@ -104,7 +104,10 @@ void string_append(string_t *s, byte_t c) {
     s->value = realloc_zero(s->value, oldsize, s->bufsize * sizeof(byte_t));
   }
   byte_t *cur =s->value + s->length;
+  printf("%d, %d\n", *cur, *(cur + 1));
+  printf("%d, %d\n", *str, *(str + 1));
   memcpy(cur, str, 2 * sizeof (byte_t));
+  printf("%d, %d\n", *cur, *(cur + 1));
   s->length++;
   printf("%s\n", cur);
 }
