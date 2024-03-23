@@ -34,16 +34,19 @@ byte_t *utf8cpy(byte_t *dst, byte_t *src, size_t sizeDest) {
   return dst;
 }
 
-bool string_comp(void *u1, void *u2) {
-  return strcmp(u1, u2);
-  if (string_len(u1) != string_len(u2)) return true;
-  for (int i = 0; i < string_len(u1); i ++) {
-    if (u1[i] != u2[i]) return true;
-  }
-  return false;
-}
+/* bool string_comp(void *a1, void *a2) { */
+/*   byte_t *u1 = a1; */
+/*   byte_t *u2 = a2; */
+/*   return strcmp(u1, u2); */
+/*   if (string_len(u1) != string_len(u2)) return true; */
+/*   for (int i = 0; i < string_len(u1); i ++) { */
+/*     if (u1[i] != u2[i]) return true; */
+/*   } */
+/*   return false; */
+/* } */
 
-string_t *init_string(void *s) {
+string_t *init_string(void *a) {
+  byte_t *s = a;
   string_t *str = malloc(sizeof(string_t));
   if (str == NULL)
     die("malloc in init_string");
