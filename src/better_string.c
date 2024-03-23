@@ -34,16 +34,11 @@ byte_t *utf8cpy(byte_t *dst, byte_t *src, size_t sizeDest) {
   return dst;
 }
 
-/* bool string_comp(void *a1, void *a2) { */
-/*   byte_t *u1 = a1; */
-/*   byte_t *u2 = a2; */
-/*   return strcmp(u1, u2); */
-/*   if (string_len(u1) != string_len(u2)) return true; */
-/*   for (int i = 0; i < string_len(u1); i ++) { */
-/*     if (u1[i] != u2[i]) return true; */
-/*   } */
-/*   return false; */
-/* } */
+bool string_comp(string_t *s1, string_t *s2) {
+  char *u1 = (char *)s1->value;
+  char *u2 = (char *)s2->value;
+  return strcmp(u1, u2);
+}
 
 string_t *init_string(void *a) {
   byte_t *s = a;
