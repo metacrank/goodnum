@@ -47,7 +47,7 @@ string_t *init_string(void *a) {
     die("malloc in init_string");
   /* If we pass in NULL we assume that we want to append things to this in the
    * future */
-  if (s == NULL || string_comp(s, "") == 0) {
+  if (s == NULL || strcmp((char *)s, "") == 0) {
     str->bufsize = 10 * sizeof(byte_t);
     str->value = calloc(str->bufsize, sizeof(byte_t));
     str->value[0] = '\0';
