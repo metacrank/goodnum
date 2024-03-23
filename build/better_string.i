@@ -1436,18 +1436,18 @@ string_t *init_string(byte_t *s) {
   }
 
   size_t leng = string_len(s);
-  str->length = leng;
   str->bufsize = 2 * leng;
   str->value = calloc(str->bufsize, sizeof(byte_t));
   if (str->value == 
-# 66 "src/better_string.c" 3 4
+# 65 "src/better_string.c" 3 4
                    ((void *)0)
-# 66 "src/better_string.c"
+# 65 "src/better_string.c"
                        )
     die("calloc in init_string");
   for (int i = 0; i < leng + 1; i ++) {
     string_append(str, s[i]);
   }
+  str->length = leng;
   return str;
 }
 
@@ -1495,20 +1495,16 @@ void string_append(string_t *s, byte_t c) {
     s->bufsize = s->bufsize * 2;
     s->value = realloc_zero(s->value, oldsize, s->bufsize * sizeof(byte_t));
   }
-  byte_t *cur =s->value + s->length;
-  printf("%d, %d\n", *cur, *(cur + 1));
-  printf("%d, %d\n", *str, *(str + 1));
+  byte_t *cur = s->value + s->length;
   memcpy(cur, str, 2 * sizeof (byte_t));
-  printf("%d, %d\n", *cur, *(cur + 1));
   s->length++;
-  printf("%s\n", cur);
 }
 
 void string_free(string_t *s) {
   if (s == 
-# 116 "src/better_string.c" 3 4
+# 112 "src/better_string.c" 3 4
           ((void *)0)
-# 116 "src/better_string.c"
+# 112 "src/better_string.c"
               )
     return;
   free(s->value);

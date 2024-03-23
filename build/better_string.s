@@ -202,106 +202,63 @@ realloc_zero:
 	.cfi_endproc
 .LFE34:
 	.size	realloc_zero, .-realloc_zero
-	.section	.rodata.str1.1
-.LC1:
-	.string	"%d, %d\n"
-.LC2:
-	.string	"%s\n"
-	.text
 	.p2align 4
 	.globl	string_append
 	.type	string_append, @function
 string_append:
 .LFB36:
 	.cfi_startproc
-	pushq	%r14
-	.cfi_def_cfa_offset 16
-	.cfi_offset 14, -16
-	movzbl	%sil, %r14d
-	movl	%r14d, %eax
-	pushq	%r13
-	.cfi_def_cfa_offset 24
-	.cfi_offset 13, -24
-	movb	$0, %ah
-	pushq	%r12
-	.cfi_def_cfa_offset 32
-	.cfi_offset 12, -32
-	movl	%esi, %r12d
-	pushq	%rbp
-	.cfi_def_cfa_offset 40
-	.cfi_offset 6, -40
-	movl	%eax, %r14d
 	pushq	%rbx
-	.cfi_def_cfa_offset 48
-	.cfi_offset 3, -48
-	movq	8(%rdi), %rsi
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	movzbl	%sil, %ecx
 	movq	%rdi, %rbx
+	movb	$0, %ch
+	subq	$16, %rsp
+	.cfi_def_cfa_offset 32
+	movq	8(%rdi), %rsi
 	movq	(%rdi), %rax
 	movq	16(%rdi), %rdi
 	leaq	-1(%rsi), %rdx
 	cmpq	%rdx, %rax
 	jnb	.L36
-.L34:
-	leaq	(%rdi,%rax), %rbp
-	movzbl	%r12b, %r12d
-	movl	$1, %edi
-	xorl	%eax, %eax
-	leaq	.LC1(%rip), %r13
-	movzbl	1(%rbp), %ecx
-	movzbl	0(%rbp), %edx
-	movq	%r13, %rsi
-	call	__printf_chk@PLT
-	movl	%r12d, %edx
-	movq	%r13, %rsi
-	xorl	%ecx, %ecx
-	movl	$1, %edi
-	xorl	%eax, %eax
-	call	__printf_chk@PLT
-	movw	%r14w, 0(%rbp)
-	movl	%r12d, %edx
-	movq	%r13, %rsi
-	movl	$1, %edi
-	xorl	%ecx, %ecx
-	xorl	%eax, %eax
-	call	__printf_chk@PLT
+	movw	%cx, (%rdi,%rax)
 	addq	$1, (%rbx)
-	movq	%rbp, %rdx
-	popq	%rbx
+	addq	$16, %rsp
 	.cfi_remember_state
-	.cfi_def_cfa_offset 40
-	leaq	.LC2(%rip), %rsi
-	popq	%rbp
-	.cfi_def_cfa_offset 32
-	movl	$1, %edi
-	popq	%r12
-	.cfi_def_cfa_offset 24
-	xorl	%eax, %eax
-	popq	%r13
 	.cfi_def_cfa_offset 16
-	popq	%r14
+	popq	%rbx
 	.cfi_def_cfa_offset 8
-	jmp	__printf_chk@PLT
+	ret
 	.p2align 4,,10
 	.p2align 3
 .L36:
 	.cfi_restore_state
 	leaq	(%rsi,%rsi), %rdx
 	movslq	%esi, %rsi
+	movl	%ecx, 12(%rsp)
 	movq	%rdx, 8(%rbx)
 	call	realloc_zero@PLT
+	movl	12(%rsp), %ecx
 	movq	%rax, 16(%rbx)
 	movq	%rax, %rdi
 	movq	(%rbx), %rax
-	jmp	.L34
+	movw	%cx, (%rdi,%rax)
+	addq	$1, (%rbx)
+	addq	$16, %rsp
+	.cfi_def_cfa_offset 16
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
 	.cfi_endproc
 .LFE36:
 	.size	string_append, .-string_append
 	.section	.rodata.str1.1
-.LC3:
+.LC1:
 	.string	"malloc in init_string"
-.LC4:
+.LC2:
 	.string	""
-.LC5:
+.LC3:
 	.string	"calloc in init_string"
 	.text
 	.p2align 4
@@ -310,17 +267,22 @@ string_append:
 init_string:
 .LFB32:
 	.cfi_startproc
-	pushq	%r12
+	pushq	%r13
 	.cfi_def_cfa_offset 16
-	.cfi_offset 12, -16
-	pushq	%rbp
+	.cfi_offset 13, -16
+	pushq	%r12
 	.cfi_def_cfa_offset 24
-	.cfi_offset 6, -24
-	pushq	%rbx
+	.cfi_offset 12, -24
+	pushq	%rbp
 	.cfi_def_cfa_offset 32
-	.cfi_offset 3, -32
+	.cfi_offset 6, -32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	.cfi_offset 3, -40
 	movq	%rdi, %rbx
 	movl	$24, %edi
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 48
 	call	malloc@PLT
 	movq	%rax, %rbp
 	testq	%rax, %rax
@@ -328,7 +290,7 @@ init_string:
 .L38:
 	testq	%rbx, %rbx
 	je	.L41
-	leaq	.LC4(%rip), %rsi
+	leaq	.LC2(%rip), %rsi
 	movq	%rbx, %rdi
 	call	string_comp@PLT
 	testb	%al, %al
@@ -337,17 +299,22 @@ init_string:
 	movq	$10, 8(%rbp)
 	movl	$1, %esi
 	movl	$10, %edi
+	xorl	%r12d, %r12d
 	call	calloc@PLT
-	movq	$0, 0(%rbp)
 	movq	%rax, 16(%rbp)
-.L37:
+.L40:
+	movq	%r12, 0(%rbp)
+	addq	$8, %rsp
+	.cfi_remember_state
+	.cfi_def_cfa_offset 40
 	movq	%rbp, %rax
 	popq	%rbx
-	.cfi_remember_state
-	.cfi_def_cfa_offset 24
+	.cfi_def_cfa_offset 32
 	popq	%rbp
-	.cfi_def_cfa_offset 16
+	.cfi_def_cfa_offset 24
 	popq	%r12
+	.cfi_def_cfa_offset 16
+	popq	%r13
 	.cfi_def_cfa_offset 8
 	ret
 	.p2align 4,,10
@@ -358,7 +325,6 @@ init_string:
 	call	string_len@PLT
 	movl	$1, %esi
 	leaq	(%rax,%rax), %rdi
-	movq	%rax, 0(%rbp)
 	movq	%rax, %r12
 	movq	%rdi, 8(%rbp)
 	call	calloc@PLT
@@ -367,8 +333,8 @@ init_string:
 	je	.L55
 .L42:
 	cmpq	$-1, %r12
-	je	.L37
-	leaq	1(%r12,%rbx), %r12
+	je	.L40
+	leaq	1(%rbx,%r12), %r13
 	.p2align 4,,10
 	.p2align 3
 .L44:
@@ -376,24 +342,15 @@ init_string:
 	movq	%rbp, %rdi
 	addq	$1, %rbx
 	call	string_append@PLT
-	cmpq	%rbx, %r12
+	cmpq	%rbx, %r13
 	jne	.L44
-	movq	%rbp, %rax
-	popq	%rbx
-	.cfi_remember_state
-	.cfi_def_cfa_offset 24
-	popq	%rbp
-	.cfi_def_cfa_offset 16
-	popq	%r12
-	.cfi_def_cfa_offset 8
-	ret
+	jmp	.L40
 .L53:
-	.cfi_restore_state
-	leaq	.LC3(%rip), %rdi
+	leaq	.LC1(%rip), %rdi
 	call	die@PLT
 	jmp	.L38
 .L55:
-	leaq	.LC5(%rip), %rdi
+	leaq	.LC3(%rip), %rdi
 	call	die@PLT
 	jmp	.L42
 	.cfi_endproc
