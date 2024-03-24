@@ -1,11 +1,7 @@
-//#include <strnum.h>
-#include "../include/strnum.h"
-#include "../include/better_string.h"
+#include <strnum.h>
+#include <better_string.h>
 #include <ctype.h>
 #include <stdio.h>
-
-//to be removed:
-typedef unsigned char byte_t;
 
 bool isfloat(string_t *s) {
   for (long i = 0; i < s->length; i++)
@@ -91,8 +87,8 @@ string_t *sum(string_t *m, string_t *n) {
     m = n;
     n = str;
   }
-  char *mval = m->value;
-  char *nval = n->value;
+  byte_t *mval = m->value;
+  byte_t *nval = n->value;
   if (negative) {
     mval = m->value + 1;
     nval = n->value + 1;
@@ -103,7 +99,7 @@ string_t *sum(string_t *m, string_t *n) {
   for (long i = m->length; i < n->length + doffset; i++) {
     string_append(m, '0');
   }
-  char carry = 0;
+  byte_t carry = 0;
   long i = n->length + doffset - 1 - negative;
   while (i >= doffset) {
     if (mval[i] != '.') {
@@ -135,3 +131,7 @@ string_t *sum(string_t *m, string_t *n) {
 }
 
 string_t *diff(string_t *m, string_t *n) {}
+
+string_t *product(string_t *m, string_t *n) {}
+
+string_t *quotient(string_t *m, string_t *n) {}

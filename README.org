@@ -1,0 +1,10 @@
+#+title: goodnum
+#+description: A better string based number library that works with reverse notation.
+
+A library for working with string based numbers that handles utf-8 encoded reverse and
+alternate bases.
+* The Problem
+One would like to work with reverse-notation numbers and in different bases when working
+with string based numbers, due to the benefits of systems such as dozenal reverse and
+chronal reverse. However, no current low level library attempts to do this, so we made our
+own.
