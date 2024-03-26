@@ -25,7 +25,7 @@ typedef struct STRING_STRUCT {
 } string_t;
 
 /* increments a byte pointer to the next unicode character */
-void inc_utf8(byte_t *b);
+void inc_utf8(byte_t **b);
 
 bool utf8cmp(byte_t *b1, byte_t *b2);
 

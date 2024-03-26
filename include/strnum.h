@@ -3,6 +3,12 @@
 #include <better_string.h>
 #include <stdbool.h>
 
+typedef struct RELATION_STRUCT {
+  size_t size;
+  byte_t *buf;
+  byte_t **relation;
+} relation_t;
+
 bool isfloat(string_t *s);
 
 bool isint(string_t *s);

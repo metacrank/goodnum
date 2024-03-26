@@ -5,25 +5,25 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-void inc_utf8(byte_t *b) {
-  if (*b < 0xC0) {
-    b++;
+void inc_utf8(byte_t **b) {
+  if (**b < 0xC0) {
+    (*b)++;
     return;
   }
-  if (*b < 0xE0) {
-    b += 2;
+  if (**b < 0xE0) {
+    *b += 2;
     return;
   }
-  if (*b < 0xF0) {
-    b += 3;
+  if (**b < 0xF0) {
+    *b += 3;
     return;
   }
-  if (*b < 0xF8) {
-    b += 4;
+  if (**b < 0xF8) {
+    *b += 4;
     return;
   }
-  if (*b < 0xFC) {
-    b += 5;
+  if (**b < 0xFC) {
+    *b += 5;
     return;
   }
   b++;
@@ -34,7 +34,7 @@ bool utf8cmp(byte_t *u1, byte_t *u2) {
   byte_t *b1 = u1 + 1;
   byte_t *b2 = u2 + 1;
   byte_t *n = u1;
-  inc_utf8(n);
+  inc_utf8(&n);
   while (b1 != n) {
     if (*b1 != *b2) return false;
     b1++;
@@ -61,7 +61,7 @@ string_t *init_string(void *a) {
   // replace with pool access later
   s->value->byte = malloc(s->space * sizeof(byte_t));
   s->value->ref = true;
-  for (byte_t *input = a; *input; inc_utf8(input)) {
+  for (byte_t *input = a; *input; inc_utf8(&input)) {
     string_append(s, *input);
   }
   return s;
@@ -97,7 +97,7 @@ void string_append(string_t *s, byte_t c) {
   *s->value[len].byte = c;
   s->value[len + 1].byte = s->value[len].byte;
   s->value[len + 1].ref = false;
-  inc_utf8(s->value[len + 1].byte);
+  inc_utf8(&s->value[len + 1].byte);
   s->length++;
 }
 
