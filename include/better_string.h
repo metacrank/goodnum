@@ -24,13 +24,16 @@ typedef struct STRING_STRUCT {
   size_t space;
 } string_t;
 
+/* returns the number of bytes encoding the unicode character at b */
+int sizeof_utf8(byte_t *b);
+
 /* increments a byte pointer to the next unicode character */
 void inc_utf8(byte_t **b);
 
-bool utf8cmp(byte_t *b1, byte_t *b2);
+int utf8cmp(byte_t *b1, byte_t *b2);
 
 /* analagous to strcmp for better_string */
-bool string_comp(string_t *s1, string_t *s2);
+int string_comp(string_t *s1, string_t *s2);
 
 /*! Allocates memory for new string */
 string_t *init_string(void *value);

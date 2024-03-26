@@ -5,50 +5,53 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+int sizeof_utf8(byte_t *b) {
+  if (*b < 0xC0) {
+    return 1;
+  }
+  if (*b < 0xE0) {
+    return 2;
+  }
+  if (*b < 0xF0) {
+    return 3;
+  }
+  if (*b < 0xF8) {
+    return 4;
+  }
+  if (*b < 0xFC) {
+    return 5;
+  }
+  return 6;
+}
+
 void inc_utf8(byte_t **b) {
-  if (**b < 0xC0) {
-    (*b)++;
-    return;
-  }
-  if (**b < 0xE0) {
-    *b += 2;
-    return;
-  }
-  if (**b < 0xF0) {
-    *b += 3;
-    return;
-  }
-  if (**b < 0xF8) {
-    *b += 4;
-    return;
-  }
-  if (**b < 0xFC) {
-    *b += 5;
-    return;
-  }
-  b++;
+  *b += sizeof_utf8(*b);
 }
 
-bool utf8cmp(byte_t *u1, byte_t *u2) {
-  if (*u1 != *u1) return false;
-  byte_t *b1 = u1 + 1;
-  byte_t *b2 = u2 + 1;
-  byte_t *n = u1;
-  inc_utf8(&n);
-  while (b1 != n) {
-    if (*b1 != *b2) return false;
-    b1++;
-    b2++;
+int utf8cmp(byte_t *b1, byte_t *b2) {
+  int size1 = sizeof_utf8(b1);
+  int size2 = sizeof_utf8(b2);
+  int retval;
+  int i;
+  for (i = 0; i < size1; i++) {
+    if (i == size2) return b1[i];
+    if ((retval = b1[i] - b2[i])) return retval;
   }
-  return true;
+  if (i != size2)
+    return - b2[i];
+  return 0;
 }
 
-bool string_comp(string_t *s1, string_t *s2) {
-  if (s1->length != s2->length) return false;
-  for (int i = 0; i < s1->length; i++) {
-    if (*s1->value[i].byte != *s1->value[i].byte) return false;
+int string_comp(string_t *s1, string_t *s2) {
+  int retval;
+  int i;
+  for (i = 0; i < s1->length; i++) {
+    if (i == s2->length) return *s1->value[i].byte;
+    if ((retval = *s1->value[i].byte - *s2->value[i].byte)) return retval;
   }
-  return false;
+  if (i != s2->length)
+    return - *s2->value[i].byte;
+  return 0;
 }
 
 string_t *init_string(void *a) {
