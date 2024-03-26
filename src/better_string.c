@@ -5,110 +5,117 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-size_t string_len(byte_t *str) {
-  if (!str) return -1;
-  size_t s = 0;
-  byte_t b = str[0];
-  while (b) {
-    s ++;
-    b = str[s];
+void inc_utf8(byte_t *b) {
+  if (*b < 0xC0) {
+    b++;
+    return;
   }
-  return s;
+  if (*b < 0xE0) {
+    b += 2;
+    return;
+  }
+  if (*b < 0xF0) {
+    b += 3;
+    return;
+  }
+  if (*b < 0xF8) {
+    b += 4;
+    return;
+  }
+  if (*b < 0xFC) {
+    b += 5;
+    return;
+  }
+  b++;
 }
 
-byte_t *utf8cpy(byte_t *dst, byte_t *src, size_t sizeDest) {
-  if (sizeDest) {
-    size_t sizeSrc = string_len(src);
-    while (sizeSrc >= sizeDest) {
-
-      byte_t *lastByte = src + sizeSrc;
-      while (lastByte-- > src)
-        if ((*lastByte & 0xC0) != 0x80)
-          break;
-
-      sizeSrc = lastByte - src;
-    }
-    memcpy(dst, src, sizeSrc);
-    dst[sizeSrc] = '\0';
+bool utf8cmp(byte_t *u1, byte_t *u2) {
+  if (*u1 != *u1) return false;
+  byte_t *b1 = u1 + 1;
+  byte_t *b2 = u2 + 1;
+  byte_t *n = u1;
+  inc_utf8(n);
+  while (b1 != n) {
+    if (*b1 != *b2) return false;
+    b1++;
+    b2++;
   }
-  return dst;
+  return true;
 }
 
 bool string_comp(string_t *s1, string_t *s2) {
-  char *u1 = (char *)s1->value;
-  char *u2 = (char *)s2->value;
-  return strcmp(u1, u2);
+  if (s1->length != s2->length) return false;
+  for (int i = 0; i < s1->length; i++) {
+    if (*s1->value[i].byte != *s1->value[i].byte) return false;
+  }
+  return false;
 }
 
 string_t *init_string(void *a) {
-  byte_t *s = a;
-  string_t *str = malloc(sizeof(string_t));
-  if (str == NULL)
-    die("malloc in init_string");
-  /* If we pass in NULL we assume that we want to append things to this in the
-   * future */
-  if (s == NULL || strcmp((char *)s, "") == 0) {
-    str->bufsize = 10 * sizeof(byte_t);
-    str->value = calloc(str->bufsize, sizeof(byte_t));
-    str->value[0] = '\0';
-    if (str->value == NULL)
-      die("calloc in init_string");
-    str->length = 0;
-    return str;
+  if (!a) return NULL;
+  string_t *s = malloc(sizeof(string_t));
+  s->length = 0;
+  s->space = 13;
+  s->bufsize = 13;
+  s->value = malloc(s->bufsize * sizeof(utf8_t));
+  // replace with pool access later
+  s->value->byte = malloc(s->space * sizeof(byte_t));
+  s->value->ref = true;
+  for (byte_t *input = a; *input; inc_utf8(input)) {
+    string_append(s, *input);
   }
-  /* Otherwise we want the initial value to be equal to the parameter */
-  str->length = 0;
-  size_t leng = string_len(s);
-  str->bufsize = 2 * leng;
-  str->value = calloc(str->bufsize, sizeof(byte_t));
-  if (str->value == NULL)
-    die("calloc in init_string");
-  for (int i = 0; i < leng; i ++) {
-    string_append(str, s[i]);
-  }
-  return str;
+  return s;
 }
 
 string_t *string_copy(string_t *s) {
   if (s == NULL)
     return NULL;
-  return init_string(s->value);
-}
-
-/* stackoverflow code */
-void *realloc_zero(void *pBuffer, size_t oldSize, size_t newSize) {
-  void *pNew = realloc(pBuffer, newSize);
-  if (pNew == NULL)
-    die("realloc on realloc_zero");
-  if (newSize > oldSize && pNew) {
-    size_t diff = newSize - oldSize;
-    void *pStart = ((char *)pNew) + oldSize;
-    memset(pStart, 0, diff);
-  }
-  return pNew;
+  string_t *cp = init_string(NULL);
+  string_concat(cp, s);
+  return cp;
 }
 
 void string_concat(string_t *s1, string_t *s2) {
   for (int i = 0; i < s2->length; i++) {
-    string_append(s1, s2->value[i]);
+    string_append(s1, *s2->value[i].byte);
   }
 }
 
 void string_append(string_t *s, byte_t c) {
-  byte_t str[2] = {c, '\0'};
-  int oldsize = s->bufsize;
+  int len = s->length;
+  if (!s->space) {
+    // replace with get from pool
+    s->space = len + 1;
+    s->value[len].byte = malloc((s->space) * sizeof(byte_t));
+    s->value[len].ref = true;
+  }
   if (s->bufsize - 1 <= s->length) {
     s->bufsize = s->bufsize * 2;
-    s->value = realloc_zero(s->value, oldsize, s->bufsize * sizeof(byte_t));
+    s->value = realloc(s->value, s->bufsize * sizeof(utf8_t));
   }
-  byte_t *cur = s->value + s->length;
-  memcpy(cur, str, 2 * sizeof (byte_t));
+  s->space--;
+  *s->value[len].byte = c;
+  s->value[len + 1].byte = s->value[len].byte;
+  s->value[len + 1].ref = false;
+  inc_utf8(s->value[len + 1].byte);
   s->length++;
 }
 
+/* void *string_at(string_t *s, size_t i) { */
+/*   return s->value[i].byte; */
+/* } */
+
+void print(string_t *s) {
+  for (int i = 0; i < s->length; i++) {
+    printf("%.1s", s->value[i].byte);
+  }
+}
+
 void string_free(string_t *s) {
-  if (s == NULL)
-    return;
+  if (s == NULL) return;
+  for (int i = 0; i < s->length; i++)
+    if (s->value[i].ref)
+      free(s->value[i].byte);
   free(s->value);
   free(s);
 }
