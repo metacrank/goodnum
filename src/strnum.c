@@ -5,20 +5,20 @@
 
 bool isfloat(string_t *s) {
   for (long i = 0; i < s->length; i++)
-    if (!isdigit(s->value[i].byte) && *s->value[i].byte != '.') return false;
+    if (!isdigit(s->value[i]) && s->value[i] != '.') return false;
   return true;
 }
 
 bool isint(string_t *s) {
   for (long i = 0; i < s->length; i++)
-    if (!isdigit(s->value[i].byte)) return false;
+    if (!isdigit(s->value[i])) return false;
   return true;
 }
 
 long order(string_t *s) {
   long i = 0;
   while (i < s->length) {
-    if (*s->value[i].byte == '.') return i - 1;
+    if (s->value[i] == '.') return i - 1;
     i++;
   }
   return s->length - 1 - i;

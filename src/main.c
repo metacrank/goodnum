@@ -6,7 +6,7 @@ int main(int argv, char **argc) {
 
   string_t *num1 = init_string("1931");
   string_t *num2 = init_string("193");
-  string_t *longstr = init_string("this is a long string (longer than thirteen characters)\n");
+  string_t *longstr = init_string("this is a long string...\n");
 
   printf("strings: ");
   print(num1);
@@ -17,7 +17,8 @@ int main(int argv, char **argc) {
   printf("1: %lu, 2: %lu\n", num1->length, num2->length);
 
   printf("%d\n", string_comp(num1, num2));
-  printf("%d\n", utf8cmp(num1->value[0].byte, num2->value[0].byte));
+
+  printf("longlen=%lu\n", longstr->length);
 
   print(longstr);
 
