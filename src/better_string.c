@@ -67,7 +67,7 @@ string_t *realloc_string(string_t *s, size_t size) {
 }
 
 void string_ensure_space(string_t **s, size_t n) {
-  if ((*s)->bufsize - n < (*s)->length)
+  if ((*s)->bufsize - n <= (*s)->length)
     (*s) = realloc_string(*s, 2 * (*s)->bufsize);
 }
 
@@ -134,6 +134,28 @@ void string_append(string_t *s, byte_t *p) {
   string_ensure_space(&s, size);
   memcpy(s->value + s->length, p, size * sizeof(byte_t));
   s->length += size;
+}
+
+void string_reverse(string_t *s) {
+  // fetch big enough string from pool
+  string_t *r = malloc(sizeof(string_t));
+  r->bufsize = s->bufsize;
+  r->length = 0;
+  r->value = malloc(s->length * sizeof(byte_t));
+  byte_t *p = &s->value[s->length];
+  dec_utf8(&p);
+  int utf8size;
+  while (p > s->value) {
+    utf8size = sizeof_utf8(p);
+    memcpy(r->value + r->length, p, utf8size);
+    r->length += utf8size;
+    dec_utf8(&p);
+  }
+  memcpy(r->value + r->length, p, sizeof_utf8(p));
+  s->value = r->value;
+  r->value = p;
+  // push to pool
+  string_free(r);
 }
 
 /* void *string_at(string_t *s, size_t i) { */

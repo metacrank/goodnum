@@ -52,6 +52,9 @@ void string_concat(string_t *s1, string_t *s2);
 /*! Appends single characters */
 void string_append(string_t *s, byte_t *c);
 
+/* reverse order of characters of a string */
+void string_reverse(string_t *s);
+
 /* gets a pointer to the utf-8 character at index i */
 /* void *string_at(string_t *s, size_t i); */
 

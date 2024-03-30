@@ -27,6 +27,21 @@ int main(int argv, char **argc) {
   string_free(longstr);
 
   init_math();
+
+  num1 = init_string("123000.012345678900000034030v00");
+  print(num1);
+  printf("\n");
+  neg(num1);
+  print(num1);
+  printf("\n");
+  fp(num1);
+  print(num1);
+  printf("\n");
+  string_reverse(num1);
+  print(num1);
+  printf("\n");
+  string_free(num1);
+
   math_free();
 
   return 0;
