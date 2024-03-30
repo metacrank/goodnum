@@ -22,6 +22,12 @@ void inc_utf8(byte_t **b) {
   *b += sizeof_utf8(*b);
 }
 
+void dec_utf8(byte_t **b) {
+  do {
+    (*b)--;
+  } while (0x80 <= **b && **b < 0xC0);
+}
+
 int utf8cmp(byte_t *b1, byte_t *b2) {
   int size1 = sizeof_utf8(b1);
   int size2 = sizeof_utf8(b2);
@@ -126,7 +132,7 @@ void string_concat(string_t *s1, string_t *s2) {
 void string_append(string_t *s, byte_t *p) {
   int size = sizeof_utf8(p);
   string_ensure_space(&s, size);
-  memcpy(s->value, p, size * sizeof(byte_t));
+  memcpy(s->value + s->length, p, size * sizeof(byte_t));
   s->length += size;
 }
 

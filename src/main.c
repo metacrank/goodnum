@@ -6,7 +6,7 @@ int main(int argv, char **argc) {
 
   string_t *num1 = init_string("1931");
   string_t *num2 = init_string("193");
-  string_t *longstr = init_string("this is a long string...\n");
+  string_t *longstr = init_string("this is a long string\u218b...\n");
 
   printf("strings: ");
   print(num1);
@@ -25,6 +25,9 @@ int main(int argv, char **argc) {
   string_free(num1);
   string_free(num2);
   string_free(longstr);
+
+  init_math();
+  math_free();
 
   return 0;
 }

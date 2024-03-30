@@ -1,13 +1,24 @@
 #ifndef STRNUM_H_
 #define STRNUM_H_
 #include <better_string.h>
+#include <macros.h>
 #include <stdbool.h>
 
 typedef struct RELATION_STRUCT {
   size_t size;
-  byte_t *buf;
   byte_t **relation;
 } relation_t;
+
+typedef struct MAPPING_STRUCT {
+  size_t n;
+  size_t m;
+  byte_t **buf;
+
+} mapping_t;
+
+void init_math();
+
+void math_free();
 
 bool isfloat(string_t *s);
 

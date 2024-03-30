@@ -26,6 +26,9 @@ int sizeof_utf8(byte_t *b);
 /* increments a byte pointer to the next unicode character */
 void inc_utf8(byte_t **b);
 
+/* decrements a byte pointer to the previous unicode character */
+void dec_utf8(byte_t **b);
+
 int utf8cmp(byte_t *b1, byte_t *b2);
 
 /* analagous to strcmp for better_string */
