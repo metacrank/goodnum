@@ -199,6 +199,53 @@ void print_utf32(int num, ...) {
   }
 }
 
+string_t *file_read(FILE *FP) {
+  if (!FP) return NULL;
+  string_t *s = init_string(U"");
+  byte_t b;
+  int c;
+  char32_t utf32;
+  while ((c = fgetc(FP)) != EOF) {
+    b = c;
+    switch (sizeof_utf8(&b)) {
+      case 1:
+        utf32 = b;
+        break;
+      case 2:
+        utf32 = b - 0xC0;
+        utf32 *= 0x40;
+        if ((c = fgetc(FP)) == EOF) return s;
+        utf32 += c - 0x80;
+        break;
+      case 3:
+        utf32 = b - 0xE0;
+        for (int _ = 0; _ < 2; _++) {
+          utf32 *= 0x40;
+          if ((c = fgetc(FP)) == EOF) return s;
+          utf32 += c - 0x80;
+        }
+      case 4:
+        utf32 = b - 0xF0;
+        for (int _ = 0; _ < 3; _++) {
+          utf32 *= 0x40;
+          if ((c = fgetc(FP)) == EOF) return s;
+          utf32 += c - 0x80;
+        }
+        break;
+    }
+    string_append(s, utf32);
+  }
+  return s;
+}
+
+void file_print(FILE *FP, string_t *s) {
+  if (!s || !FP) return;
+  for (long i = 0; i < s->length; i++) {
+    utf32_to_utf8(print_buffer, s->value[i]);
+    fprintf(FP, "%s", print_buffer);
+  }
+}
+
 void string_free(string_t *s) {
   if (s == NULL) return;
   free(s->value);

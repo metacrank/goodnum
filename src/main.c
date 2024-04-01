@@ -48,5 +48,12 @@ int main(int argv, char **argc) {
 
   math_free();
 
+  FILE *FP = fopen("test.txt", "rb");
+  string_t *f = file_read(FP);
+  if (!f) return 1;
+  fclose(FP);
+  print(f);
+  string_free(f);
+
   return 0;
 }

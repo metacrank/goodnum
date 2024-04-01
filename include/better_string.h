@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <uchar.h>
+#include <stdio.h>
 /*! We want better strings to realloc less and keep track of the length of the
  * string so we don't have to call strlen every time */
 
@@ -66,6 +67,9 @@ void print_utf32(int, ...);
 
 /* prints a string */
 void print(string_t *s);
+
+/* reads a utf8 file into string_t */
+string_t *file_read(FILE *FP);
 
 /*! Frees space for string */
 void string_free(string_t *s);
