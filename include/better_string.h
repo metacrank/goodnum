@@ -71,6 +71,9 @@ void print(string_t *s);
 /* reads a utf8 file into string_t */
 string_t *file_read(FILE *FP);
 
+/* prints to utf8 file */
+void file_print(FILE *FP, string_t *s);
+
 /*! Frees space for string */
 void string_free(string_t *s);
 

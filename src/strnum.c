@@ -57,10 +57,12 @@ void init_digits() {
   if (RADIUS + (1 - B_ODD) + 4 < N_O_D) {
     digits[RADIUS + (1 - B_ODD) + 4] = d_negative_five;
   }
-  printf("init digits: ");
-  for (int i = 0; i < N_O_D; i++)
-    print_utf32(1, digits[i]);
-  printf("\n");
+  if (DEBUG) {
+    printf("init digits: ");
+    for (int i = 0; i < N_O_D; i++)
+      print_utf32(1, digits[i]);
+    printf("\n");
+  }
 }
 
 void init_neg() {
@@ -71,11 +73,13 @@ void init_neg() {
   for (int i = RADIUS; i < N_O_D; i++) {
     negation_table[di(digits[i])] = digits[i - RADIUS + B_ODD];
   }
-  printf("init neg: ");
-  for (int i = 0; i < N_O_D; i++) {
-    print_utf32(1, negation_table[di(digits[i])]);
+  if (DEBUG) {
+    printf("init neg: ");
+    for (int i = 0; i < N_O_D; i++) {
+      print_utf32(1, negation_table[di(digits[i])]);
+    }
+    printf("\n");
   }
-  printf("\n");
 }
 
 void init_digit_values() {
@@ -163,16 +167,18 @@ void init_add() {
     }
     a++;
   }
-  printf("init add:\n");
-  // print out resulting table
-  for (int i = 0; i < N_O_D; i++) {
-    for (int j = 0; j < N_O_D; j++) {
-      char32_t b1 = addition_carry_table[didx(i)][didx(j)];
-      char32_t b2 = addition_sum_table[didx(i)][didx(j)];
-      print_utf32(2, b1, b2);
-      printf(" ");
+  if (DEBUG) {
+    printf("init add:\n");
+    // print out resulting table
+    for (int i = 0; i < N_O_D; i++) {
+      for (int j = 0; j < N_O_D; j++) {
+        char32_t b1 = addition_carry_table[didx(i)][didx(j)];
+        char32_t b2 = addition_sum_table[didx(i)][didx(j)];
+        print_utf32(2, b1, b2);
+        printf(" ");
+      }
+      printf("\n");
     }
-    printf("\n");
   }
 }
 
@@ -187,16 +193,18 @@ void init_sub() {
       subtraction_sum_table[m][n] = addition_sum_table[m][r];
     }
   }
-  printf("init sub:\n");
-  // print out resulting table
-  for (int i = 0; i < N_O_D; i++) {
-    for (int j = 0; j < N_O_D; j++) {
-      char32_t b1 = subtraction_carry_table[didx(i)][didx(j)];
-      char32_t b2 = subtraction_sum_table[didx(i)][didx(j)];
-      print_utf32(2, b1, b2);
-      printf(" ");
+  if (DEBUG) {
+    printf("init sub:\n");
+    // print out resulting table
+    for (int i = 0; i < N_O_D; i++) {
+      for (int j = 0; j < N_O_D; j++) {
+        char32_t b1 = subtraction_carry_table[didx(i)][didx(j)];
+        char32_t b2 = subtraction_sum_table[didx(i)][didx(j)];
+        print_utf32(2, b1, b2);
+        printf(" ");
+      }
+      printf("\n");
     }
-    printf("\n");
   }
 }
 
@@ -263,8 +271,7 @@ long order(string_t *s) {
 long string_to_int(string_t *s) {
   int j = s->length - 1;
   long d = 0;
-  long i;
-  for (i = 0; j >= 0; i++) {
+  for (long i = 0; j >= 0; i++) {
     d += digit_values[di(s->value[j])] * pow(BASE, i);
     j--;
   }
@@ -362,7 +369,7 @@ string_t *fp(string_t *s) {
 }
 
 bool sum_positive(string_t *m, string_t *n) {
-  return false;
+  return true;
 }
 
 /* string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix, */
@@ -506,7 +513,7 @@ string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
           }
           break;
         }
-        if (*n_rad == '.' || m_rad == m_end) {
+        if (*n_rad == '.' || n_rad == n_end) {
           while (m_rad < m_end) {
             if (*m_rad == '.') break;
             m_rad++;
@@ -643,6 +650,94 @@ string_t *diff(string_t *m, string_t *n) {
   return diff;
 }
 
-string_t *product(string_t *m, string_t *n) {}
+string_t *product(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  return double_to_string(mf * nf);
+}
 
-string_t *quotient(string_t *m, string_t *n) {}
+string_t *quotient(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  return double_to_string(mf / nf);
+}
+
+string_t *str_sqrt(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(sqrt(mf));
+}
+
+string_t *gaussian(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(exp(-mf * mf));
+}
+
+string_t *str_exp(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(exp(mf));
+}
+
+string_t *str_ln(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(log(mf));
+}
+
+string_t *str_pow(string_t *m, string_t *n) {
+  string_t *mln = str_ln(m);
+  string_t *pr = product(mln, n);
+  return str_exp(pr);
+}
+
+string_t *str_sin(string_t *m) {
+  // replace with complex form
+  long double mf = string_to_double(m);
+  return double_to_string(sin(mf));
+}
+
+string_t *str_cos(string_t *m) {
+  // replace with complex form
+  long double mf = string_to_double(m);
+  return double_to_string(cos(mf));
+}
+
+string_t *str_ceil(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(ceil(mf));
+}
+
+string_t *str_floor(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(floor(mf));
+}
+
+string_t *geq(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf >= nf)
+    return init_string(U"t");
+  return init_string(U"");
+}
+
+string_t *leq(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf <= nf)
+    return init_string(U"t");
+  return init_string(U"");
+}
+
+string_t *gthan(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf > nf)
+    return init_string(U"t");
+  return init_string(U"");
+}
+
+string_t *lthan(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf < nf)
+    return init_string(U"t");
+  return init_string(U"");
+}
