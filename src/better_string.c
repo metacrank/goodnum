@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdarg.h>
+
+byte_t print_buffer[5];
 
 int sizeof_utf8(byte_t *b) {
   if (*b < 0xC0) {
@@ -42,6 +45,46 @@ int utf8cmp(byte_t *b1, byte_t *b2) {
   return 0;
 }
 
+// assumes little endian
+size_t utf32_to_utf8(byte_t *const buf, const char32_t utf32) {
+  if (utf32 < 0x80) {
+    buf[0] = utf32;
+    return 1;
+  }
+  if (utf32 < 0x800) {
+    buf[0] = 0xC0 | (utf32 >> 6);            /* 110xxxxx */
+    buf[1] = 0x80 | (utf32 & 0x3F);          /* 10xxxxxx */
+    return 2;
+  }
+  if (utf32 < 0x10000) {
+    buf[0] = 0xE0 | (utf32 >> 12);           /* 1110xxxx */
+    buf[1] = 0x80 | ((utf32 >> 6) & 0x3F);   /* 10xxxxxx */
+    buf[2] = 0x80 | (utf32 & 0x3F);          /* 10xxxxxx */
+    return 3;
+  }
+  if (utf32 < 0x110000) {
+    buf[0] = 0xF0 | (utf32 >> 18);           /* 11110xxx */
+    buf[1] = 0x80 | ((utf32 >> 12) & 0x3F);  /* 10xxxxxx */
+    buf[2] = 0x80 | ((utf32 >> 6) & 0x3F);   /* 10xxxxxx */
+    buf[3] = 0x80 | (utf32 & 0x3F);          /* 10xxxxxx */
+    return 4;
+  }
+  return 0;
+}
+
+char32_t utf8_to_utf32(byte_t *const buf) {
+  if (buf[0] < 0xC0) {
+    return buf[0];
+  }
+  if (buf[0] < 0xE0) {
+    return (buf[0] - 0xC0) * 0x40 + buf[1] - 0x80;
+  }
+  if (buf[0] < 0xF0) {
+    return (buf[0] - 0xE0) * 0x1000 + (buf[1] - 0x80) * 0x40 + buf[2] - 0x80;
+  }
+  return (buf[0] - 0xF0) * 0x40000 + (buf[1] - 0x80) * 1000 + (buf[2] - 0x80) * 0x40 + buf[3] - 0x80;
+}
+
 int string_comp(string_t *s1, string_t *s2) {
   int retval;
   int i;
@@ -54,116 +97,106 @@ int string_comp(string_t *s1, string_t *s2) {
   return 0;
 }
 
-string_t *realloc_string(string_t *s, size_t size) {
+void realloc_string(string_t *s, size_t size) {
+  //fetch from pool
   string_t *newstr = malloc(sizeof(string_t));
   newstr->bufsize = size;
-  newstr->length = s->length;
-  //fetch from pool
-  newstr->value = malloc(size * sizeof(byte_t));
-  memcpy(newstr->value, s->value, s->length * sizeof(byte_t));
+  newstr->value = malloc(size * sizeof(char32_t));
+
+  char32_t *val = newstr->value;
+  newstr->value = s->value;
+  s->value = val;
+
+  memcpy(s->value, newstr->value, s->length * sizeof(char32_t));
   //add to pool
-  string_free(s);
-  return newstr;
+  string_free(newstr);
 }
 
-void string_ensure_space(string_t **s, size_t n) {
-  if ((*s)->bufsize - n <= (*s)->length)
-    (*s) = realloc_string(*s, 2 * (*s)->bufsize);
+void string_ensure_space(string_t *s, size_t n) {
+  if (s->bufsize < s->length + n) {
+  int k = 2;
+  while (k * s->bufsize < s->length + n)
+    k *= 2;
+  realloc_string(s, k * s->bufsize);
+  }
 }
 
-string_t *init_string(void *a) {
+string_t *init_string(char32_t *a) {
   if (!a) return NULL;
   string_t *s = malloc(sizeof(string_t));
   s->length = 0;
   s->bufsize = 24;
   // replace with pool access later
-  s->value = malloc(s->bufsize * sizeof(byte_t));
-  byte_t *input = a;
-  /* wchar_t append; */
-  while (*input != '\0') {
-    /* append = 0; */
-    /* for (int size = sizeof_utf8(input); size > 0; size--) { */
-    /*   append += *input; */
-    /*   input++; */
-    /* } */
-    /* string_append(s, append); */
-    string_ensure_space(&s, 1);
-    memcpy(s->value + s->length, input, sizeof(byte_t));
+  s->value = malloc(s->bufsize * sizeof(char32_t));
+  while (*a != '\0') {
+    string_ensure_space(s, 1);
+    s->value[s->length] = *a;
     s->length++;
-    input++;
+    a++;
   }
-  memcpy(s->value + s->length, input, sizeof(byte_t));
   return s;
 }
 
 string_t *string_copy(string_t *s) {
   if (s == NULL)
     return NULL;
+  // fetch from pool
   string_t *cp = malloc(sizeof(string_t));
   cp->bufsize = s->bufsize;
   cp->length = s->length;
-  cp->value = malloc(cp->bufsize * sizeof(byte_t));
-  memcpy(cp->value, s->value, (s->length + 1) * sizeof(byte_t));
+  cp->value = malloc(cp->bufsize * sizeof(char32_t));
+  for (long i = 0; i < s->length; i++) {
+    cp->value[i] = s->value[i];
+  }
   return cp;
 }
 
 void string_concat(string_t *s1, string_t *s2) {
-  string_ensure_space(&s1, s2->length);
-  memcpy(s1->value + s1->length, s2->value, (s2->length + 1) * sizeof(byte_t));
-  s1->length += s2->length;
+  string_ensure_space(s1, s2->length);
+  for (long i = 0; i < s2->length; i++) {
+    s1->value[s1->length] = s2->value[i];
+    s1->length++;
+  }
 }
 
-/* void string_append(string_t *s, wchar_t c) { */
-/*   int len = s->length; */
-/*   if (s->bufsize <= len) { */
-/*     //add to pool */
-/*     string_t *memstr = malloc(sizeof(string_t)); */
-/*     memstr->bufsize = s->bufsize; */
-/*     memstr->value = s->value; */
-/*     s->bufsize *= 2; */
-/*     //fetch from pool */
-/*     s->value = malloc(s->bufsize * sizeof(wchar_t)); */
-/*     memcpy(s->value, memstr->value, memstr->bufsize); */
-/*   } */
-/*   s->value[len] = c; */
-/*   s->length++; */
-/* } */
-
-void string_append(string_t *s, byte_t *p) {
-  int size = sizeof_utf8(p);
-  string_ensure_space(&s, size);
-  memcpy(s->value + s->length, p, size * sizeof(byte_t));
-  s->length += size;
+void string_append(string_t *s, char32_t c) {
+  string_ensure_space(s, 1);
+  s->value[s->length] = c;
+  s->length++;
 }
 
 void string_reverse(string_t *s) {
-  // fetch big enough string from pool
-  string_t *r = malloc(sizeof(string_t));
-  r->bufsize = s->bufsize;
-  r->length = 0;
-  r->value = malloc(s->length * sizeof(byte_t));
-  byte_t *p = &s->value[s->length];
-  dec_utf8(&p);
-  int utf8size;
-  while (p > s->value) {
-    utf8size = sizeof_utf8(p);
-    memcpy(r->value + r->length, p, utf8size);
-    r->length += utf8size;
-    dec_utf8(&p);
+  char32_t temp;
+  size_t len = s->length;
+  for (long i = 0; i < len / 2; i++) {
+    temp = s->value[i];
+    s->value[i] = s->value[len - 1 - i];
+    s->value[len - 1 - i] = temp;
   }
-  memcpy(r->value + r->length, p, sizeof_utf8(p));
-  s->value = r->value;
-  r->value = p;
-  // push to pool
-  string_free(r);
 }
 
-/* void *string_at(string_t *s, size_t i) { */
-/*   return s->value[i].byte; */
-/* } */
+void print_formatted(const char32_t *str, ...) {
+  va_list args;
+  va_start(args, str);
+  //vwprintf((const wchar_t *)str, args);
+  va_end(args);
+}
 
 void print(string_t *s) {
-  printf("%.*s", (int)s->length, s->value);
+  for (long i = 0; i < s->length; i++) {
+    utf32_to_utf8(print_buffer, s->value[i]);
+    printf("%s", print_buffer);
+  }
+}
+
+void print_utf32(int num, ...) {
+  va_list args;
+  va_start(args, num);
+  for (int i = 0; i < num; i++) {
+    char32_t utf32 = va_arg(args, char32_t);
+    utf32_to_utf8(print_buffer, utf32);
+    printf("%s", print_buffer);
+  }
 }
 
 void string_free(string_t *s) {

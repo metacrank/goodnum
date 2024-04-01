@@ -4,6 +4,18 @@
 #include <macros.h>
 #include <stdbool.h>
 
+typedef struct RELATION_STRUCT {
+  size_t size;
+  byte_t **relation;
+} relation_t;
+
+typedef struct MAPPING_STRUCT {
+  size_t n;
+  size_t m;
+  byte_t **buf;
+
+} mapping_t;
+
 void init_math();
 
 void math_free();
@@ -28,15 +40,12 @@ string_t *ip(string_t *s);
 
 string_t *fp(string_t *s);
 
-bool sum_positive(string_t *m, string_t *n);
-
 // returns the sum of m and n, where:
 // m_radix is a pointer to the radix point in m, if known
 // n_radix is a pointer to the radix point in n, if known
 // sum_buffer has a buffer to put the sum in, if relevant
 // sb_radix holds a pointer to the radix point (0th place value) in the buffer, if sum_buffer is not NULL
-string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
-              string_t *sum_buffer, char32_t *sb_radix);
+string_t *sum(string_t *m, string_t *n, byte_t *m_radix, byte_t *n_radix, string_t *sum_buffer, byte_t *sb_radix);
 
 string_t *diff(string_t *m, string_t *n);
 

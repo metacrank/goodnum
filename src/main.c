@@ -4,43 +4,47 @@
 
 int main(int argv, char **argc) {
 
-  string_t *num1 = init_string("1931");
-  string_t *num2 = init_string("193");
-  string_t *longstr = init_string("this is a long string\u218b...\n");
+  init_math();
 
-  printf("strings: ");
+  string_t *num1 = init_string(U"123.012342");
+  string_t *num2 = init_string(U"892.298761");
+
   print(num1);
-  printf(" ");
+  printf("\n");
   print(num2);
   printf("\n");
 
-  printf("1: %lu, 2: %lu\n", num1->length, num2->length);
+  string_t *sm = sum(num1, num2, NULL, NULL, NULL, NULL);
 
-  printf("%d\n", string_comp(num1, num2));
+  print(sm);
+  printf("\n^ sum\n");
 
-  printf("longlen=%lu\n", longstr->length);
+  double dsm = string_to_double(sm);
+  printf("float: %f\n", dsm);
 
-  print(longstr);
+  ip(sm);
+  int ism = string_to_int(sm);
+  printf("ip: ");
+  print(sm);
+  printf("\nint: %d\n", ism);
+
+  string_t *intstr = int_to_string(12345);
+  string_t *doublestr = double_to_string(37.625);
+
+  print(intstr);
+  printf("\n");
+
+  string_free(intstr);
+  string_free(doublestr);
+
+  string_reverse(num1);
+  printf("num1 reversed: ");
+  print(num1);
+  printf("\n");
 
   string_free(num1);
   string_free(num2);
-  string_free(longstr);
-
-  init_math();
-
-  num1 = init_string("123000.012345678900000034030v00");
-  print(num1);
-  printf("\n");
-  neg(num1);
-  print(num1);
-  printf("\n");
-  fp(num1);
-  print(num1);
-  printf("\n");
-  string_reverse(num1);
-  print(num1);
-  printf("\n");
-  string_free(num1);
+  string_free(sm);
 
   math_free();
 
