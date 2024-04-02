@@ -72,5 +72,12 @@ int main(int argv, char **argc) {
   print(f);
   string_free(f);
 
+  string_t *bigstr = init_string(U"100002000001000020000010000000000000000002222222200000000000000000000");
+
+  print(bigstr);
+  printf("\n");
+
+  string_free(bigstr);
+
   return 0;
 }
