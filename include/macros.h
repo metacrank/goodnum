@@ -79,6 +79,9 @@
 #define DEFAULT_STACK_SIZE 10
 #define DEFAULT_NUMBER_BASE 10
 
+/* basic debug levels */
+#define DEBUG 1
+
 /*! Die in case of catastrophic memory problem */
 void die(void *message);
 

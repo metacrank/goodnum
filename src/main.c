@@ -28,10 +28,12 @@ int main(int argv, char **argc) {
   print(sm);
   printf("\nint: %d\n", ism);
 
-  string_t *intstr = int_to_string(12345);
-  string_t *doublestr = double_to_string(37.625);
-
+  string_t *intstr = int_to_string(1);
   print(intstr);
+  printf("\n");
+
+  string_t *doublestr = double_to_string(6, 3, false);
+  print(doublestr);
   printf("\n");
 
   string_free(intstr);
