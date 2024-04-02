@@ -789,7 +789,9 @@ string_t *str_pow(string_t *m, string_t *n) {
   string_t *mln = str_ln(m);
   string_t *pr = product(mln, n);
   string_free(mln);
-  return str_exp(pr);
+  string_t *exps = str_exp(pr);
+  string_free(pr);
+  return exps;
 }
 
 string_t *str_sin(string_t *m) {
