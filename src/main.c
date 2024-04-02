@@ -73,10 +73,14 @@ int main(int argv, char **argc) {
   string_free(f);
 
   string_t *bigstr = init_string(U"100002000001000020000010000000000000000002222222200000000000000000000");
+  printf("l=%lu,b=%lu\n", bigstr->length, bigstr->bufsize);
 
   print(bigstr);
   printf("\n");
 
+  string_t *bigcopy = string_copy(bigstr);
+
+  string_free(bigcopy);
   string_free(bigstr);
 
   return 0;
