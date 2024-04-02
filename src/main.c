@@ -48,6 +48,21 @@ int main(int argv, char **argc) {
   string_free(num2);
   string_free(sm);
 
+  string_t *two = int_to_string(2);
+  string_t *three = int_to_string(3);
+  print(two);
+  printf("\n");
+  print(three);
+  printf("\n* =\n");
+
+  string_t *prod = product(two, three);
+  print(prod);
+  printf("\n");
+
+  string_free(two);
+  string_free(three);
+  string_free(prod);
+
   math_free();
 
   FILE *FP = fopen("test.txt", "rb");
