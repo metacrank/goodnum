@@ -788,6 +788,7 @@ string_t *str_ln(string_t *m) {
 string_t *str_pow(string_t *m, string_t *n) {
   string_t *mln = str_ln(m);
   string_t *pr = product(mln, n);
+  string_free(mln);
   return str_exp(pr);
 }
 
